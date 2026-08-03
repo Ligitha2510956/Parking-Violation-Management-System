@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="barrier-strip" aria-hidden="true"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="login.html" class="brand">
+      <span class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 17V7a2 2 0 0 1 2-2h9l5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.8"/><path d="M9 21v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" stroke="currentColor" stroke-width="1.8"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="form-wrap-centered form-wrap-tall">
+    <div class="form-card">
+      <h2>Log in to your account</h2>
+      <p class="sub">Admin, Officer, and Vehicle Owner all sign in from here.</p>
+
+      <div id="flash" class="flash" style="display:none;"></div>
+
+      <form id="loginForm" class="form">
+        <label class="field">
+          <span>Username / Vehicle Number</span>
+          <input type="text" name="username" placeholder="e.g. TN09AB1234" required autofocus>
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+           data-callback="handleGoogleLogin"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-shape="rectangular"
+           data-theme="outline" data-text="signin_with" data-size="large"
+           data-width="100%"></div>
+      <p class="google-note">(Replace the Client ID in login.html + register.html to activate Google Sign-In — see README.)</p>
+
+      <p class="switch">New here? <a href="register.html">Create an account</a></p>
+    </div>
+  </div>
+</main>
+
+<footer class="foot"><span>Registration &middot; Login/Logout &middot; Authentication &middot; Dashboard</span></footer>
+
+<script src="script.js"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = new URLSearchParams(new FormData(e.target));
+    postForm('/api/login', form).then(res => {
+      if (res.ok) {
+        window.location.href = 'dashboard.html';
+      } else {
+        showFlash(res.message, 'error');
+      }
+    });
+  });
+</script>
+</body>
+</html>

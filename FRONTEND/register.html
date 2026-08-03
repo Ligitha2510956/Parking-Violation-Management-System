@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="barrier-strip" aria-hidden="true"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="login.html" class="brand">
+      <span class="brand-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 17V7a2 2 0 0 1 2-2h9l5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.8"/><path d="M9 21v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" stroke="currentColor" stroke-width="1.8"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="form-wrap-centered">
+    <div class="form-card form-card-wide">
+      <h2>Create your account</h2>
+      <p class="sub">Choose your role, then fill in your details.</p>
+
+      <div id="flash" class="flash" style="display:none;"></div>
+
+      <form id="registerForm" class="form">
+        <div class="role-cards">
+          <label class="role-card">
+            <input type="radio" name="role" value="VEHICLE_OWNER" checked onchange="toggleVehicleField()">
+            <span class="role-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 17V7a2 2 0 0 1 2-2h9l5 5v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="role-card-label">Vehicle Owner</span>
+          </label>
+          <label class="role-card">
+            <input type="radio" name="role" value="OFFICER" onchange="toggleVehicleField()">
+            <span class="role-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20c1.4-3.6 4.4-5.5 7.5-5.5s6.1 1.9 7.5 5.5" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="role-card-label">Officer</span>
+          </label>
+          <label class="role-card">
+            <input type="radio" name="role" value="ADMIN" onchange="toggleVehicleField()">
+            <span class="role-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="role-card-label">Admin</span>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Full Name</span>
+          <input type="text" name="fullName" placeholder="Full name" required>
+        </label>
+
+        <label class="field">
+          <span>Username / Vehicle Number</span>
+          <input type="text" name="username" placeholder="e.g. TN09AB1234" required>
+        </label>
+
+        <label class="field" id="vehicleTypeField">
+          <span>Vehicle Type</span>
+          <input type="text" name="vehicleType" placeholder="Car / Two-wheeler / Other">
+        </label>
+
+        <label class="field">
+          <span>Contact Number</span>
+          <input type="text" name="contactNumber" placeholder="10-digit mobile number">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" placeholder="At least 6 characters" required minlength="6">
+          </label>
+          <label class="field">
+            <span>Confirm Password</span>
+            <input type="password" name="confirmPassword" placeholder="Re-enter password" required minlength="6">
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Create account</button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+           data-callback="handleGoogleLogin"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-shape="rectangular"
+           data-theme="outline" data-text="signup_with" data-size="large"
+           data-width="100%"></div>
+
+      <p class="switch">Already registered? <a href="login.html">Log in</a></p>
+    </div>
+  </div>
+</main>
+
+<footer class="foot"><span>&copy; All rights reserved.</span></footer>
+
+<script src="script.js"></script>
+<script>
+  function toggleVehicleField() {
+    const role = document.querySelector('input[name="role"]:checked').value;
+    document.getElementById('vehicleTypeField').style.display = (role === 'VEHICLE_OWNER') ? 'flex' : 'none';
+  }
+  document.addEventListener('DOMContentLoaded', toggleVehicleField);
+
+  document.getElementById('registerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = new URLSearchParams(new FormData(e.target));
+    postForm('/api/register', form).then(res => {
+      if (res.ok) {
+        window.location.href = 'login.html';
+      } else {
+        showFlash(res.message, 'error');
+      }
+    });
+  });
+</script>
+</body>
+</html>
