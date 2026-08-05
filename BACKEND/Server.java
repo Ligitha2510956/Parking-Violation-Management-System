@@ -13,18 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Module 1 backend - Registration / Login / Logout / Authentication / Dashboard.
- *
- * No Maven, no Spring Boot, no Tomcat install needed - this uses Java's own
- * built-in HttpServer class (com.sun.net.httpserver), included with every JDK.
- *
- * How to run:
- *   1. Open a terminal INSIDE the "backend" folder.
- *   2. javac Server.java UserStore.java
- *   3. java backend.Server        (run this from the PARENT folder - see README)
- *   4. Open http://localhost:8080 in your browser.
- */
+
 public class Server {
 
     // username -> session id ,  session id -> username
@@ -41,7 +30,7 @@ public class Server {
         server.createContext("/api/me", Server::handleMe);
         server.createContext("/api/google-login", Server::handleGoogleLogin);
 
-        // --- Everything else = serve a file from the frontend folder ---
+        
         server.createContext("/", Server::handleStatic);
 
         server.setExecutor(null);
@@ -49,9 +38,7 @@ public class Server {
         System.out.println("PVMS server running at http://localhost:8080");
     }
 
-    // =================================================================
-    // Static file serving (login.html, register.html, dashboard.html, css, js)
-    // =================================================================
+    
     private static void handleStatic(HttpExchange ex) throws IOException {
         String path = ex.getRequestURI().getPath();
         if (path.equals("/")) path = "/login.html";
@@ -81,9 +68,9 @@ public class Server {
         return "application/octet-stream";
     }
 
-    // =================================================================
+    
     // POST /api/register
-    // =================================================================
+    
     private static void handleRegister(HttpExchange ex) throws IOException {
         if (!ex.getRequestMethod().equalsIgnoreCase("POST")) {
             respondJson(ex, 405, jsonError("Method not allowed"));
@@ -129,9 +116,9 @@ public class Server {
         respondJson(ex, 200, "{\"ok\":true,\"message\":\"Registration successful! Please log in.\"}");
     }
 
-    // =================================================================
+    
     // POST /api/login
-    // =================================================================
+   
     private static void handleLogin(HttpExchange ex) throws IOException {
         if (!ex.getRequestMethod().equalsIgnoreCase("POST")) {
             respondJson(ex, 405, jsonError("Method not allowed"));
@@ -152,9 +139,9 @@ public class Server {
         respondJson(ex, 200, "{\"ok\":true,\"message\":\"Login successful.\"}");
     }
 
-    // =================================================================
+    
     // POST /api/logout
-    // =================================================================
+    
     private static void handleLogout(HttpExchange ex) throws IOException {
         String sessionId = getCookie(ex, "PVMS_SESSION");
         if (sessionId != null) sessions.remove(sessionId);
@@ -162,9 +149,9 @@ public class Server {
         respondJson(ex, 200, "{\"ok\":true}");
     }
 
-    // =================================================================
+    
     // GET /api/me  -> current logged-in user's details (used by dashboard.html)
-    // =================================================================
+    
     private static void handleMe(HttpExchange ex) throws IOException {
         String username = currentUsername(ex);
         if (username == null) {
@@ -182,9 +169,9 @@ public class Server {
         respondJson(ex, 200, json);
     }
 
-    // =================================================================
+    
     // POST /api/google-login  (body: credential=<Google ID token from the button>)
-    // =================================================================
+    
     private static void handleGoogleLogin(HttpExchange ex) throws IOException {
         if (!ex.getRequestMethod().equalsIgnoreCase("POST")) {
             respondJson(ex, 405, jsonError("Method not allowed"));
@@ -241,10 +228,9 @@ public class Server {
             respondJson(ex, 500, jsonError("Google sign-in failed: " + e.getMessage()));
         }
     }
-
-    // =================================================================
+    
     // Small helpers
-    // =================================================================
+   
     private static void startSession(HttpExchange ex, String username) {
         String sessionId = UUID.randomUUID().toString();
         sessions.put(sessionId, username);

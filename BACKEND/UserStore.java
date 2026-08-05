@@ -6,14 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Stores users in a plain text file (users.txt) - no database software needed.
- * Each line = one user, fields separated by "|":
- *   id|fullName|username|passwordHash|role|contactNumber|vehicleType|googleEmail
- *
- * passwordHash and googleEmail may be empty (Google-only accounts have no password;
- * normal accounts have an empty googleEmail).
- */
+
 public class UserStore {
 
     private static final String FILE_PATH = "users.txt";
@@ -30,9 +23,9 @@ public class UserStore {
         public String googleEmail;
     }
 
-    // ---------------------------------------------------------------
-    // Password hashing (SHA-256) - so passwords are never stored as plain text
-    // ---------------------------------------------------------------
+    
+    // Password hashing  so passwords are never stored as plain text
+    
     public static String hash(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -45,9 +38,9 @@ public class UserStore {
         }
     }
 
-    // ---------------------------------------------------------------
+    
     // File read/write helpers
-    // ---------------------------------------------------------------
+   
     private static List<User> readAll() {
         synchronized (LOCK) {
             List<User> users = new ArrayList<>();
@@ -94,9 +87,9 @@ public class UserStore {
         }
     }
 
-    // ---------------------------------------------------------------
+    
     // Public API used by the server
-    // ---------------------------------------------------------------
+    
     public static Optional<User> findByUsername(String username) {
         return readAll().stream()
                 .filter(u -> u.username.equalsIgnoreCase(username))
