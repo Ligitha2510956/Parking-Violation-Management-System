@@ -3,6 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function OfficerDashboard() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [categories, setCategories] = useState([]);
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("Car");
@@ -72,6 +78,9 @@ function OfficerDashboard() {
       <div className="app-header">
         <div className="app-header-brand">PVMS <span>Officer</span></div>
         <div className="app-header-right">
+          <span className="live-clock">
+            {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
           <div className="pill-badge accent">👮 {officer?.name}</div>
           <button className="logout-pill" onClick={handleLogout}>Log Out</button>
         </div>

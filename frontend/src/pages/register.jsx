@@ -5,7 +5,6 @@ import { useNavigate, Link } from "react-router-dom";
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +25,6 @@ function Register() {
       await axios.post("http://localhost:8080/api/users/register", {
         name,
         email,
-        phone,
         password,
         role: "OWNER",
       });
@@ -48,9 +46,7 @@ function Register() {
       <div className="form-wrap-centered">
         <div className="form-card form-card-wide">
           <h2>Create your account</h2>
-          <p style={{ color: "var(--ink-muted)", fontSize: "0.9rem", margin: "0 0 24px" }}>
-            Register as a Vehicle Owner to view fines and manage appeals.
-          </p>
+          
 
           <form onSubmit={handleRegister}>
             <div className="field">
@@ -61,11 +57,6 @@ function Register() {
             <div className="field">
               <label>Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-
-            <div className="field">
-              <label>Contact Number</label>
-              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="10-digit mobile number" />
             </div>
 
             <div style={{ display: "flex", gap: "14px" }}>
@@ -85,12 +76,6 @@ function Register() {
               Create account
             </button>
           </form>
-
-          <div className="divider"><span>or</span></div>
-
-          <button type="button" className="btn btn-outline btn-block">
-            Sign up with Google
-          </button>
 
           <p className="switch">
             Already registered? <Link to="/">Log in</Link>

@@ -3,6 +3,12 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function OwnerDashboard() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [vehicles, setVehicles] = useState([]);
   const [violations, setViolations] = useState({}); // { vehicleId: [violations] }
   const [claimNumber, setClaimNumber] = useState("");
@@ -75,6 +81,9 @@ function OwnerDashboard() {
         <div className="topbar-inner">
           <span className="brand-icon">🅿️</span>
           <nav className="topbar-nav">
+            <span className="live-clock">
+              {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            </span>
             <a href="#" className="btn-ghost" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
               Log out
             </a>
@@ -84,7 +93,6 @@ function OwnerDashboard() {
 
       <main className="container">
         <div className="dash-head">
-          <p className="eyebrow"><span className="live-dot"></span>Live overview</p>
           <h1>Welcome, {owner?.name}</h1>
         </div>
 
@@ -100,6 +108,9 @@ function OwnerDashboard() {
           Register / Claim a Vehicle
         </div>
         <div className="panel">
+          <p style={{ color: "var(--ink-muted)", fontSize: "0.85rem", margin: "0 0 16px" }}>
+            Link a vehicle you own to your account — any violations recorded against it will then show up below.
+          </p>
           <form onSubmit={handleClaim} className="register-form-row">
             <div className="field">
               <label>Vehicle Number</label>

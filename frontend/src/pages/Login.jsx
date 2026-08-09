@@ -37,9 +37,7 @@ function Login() {
       <div className="form-wrap-centered">
         <div className="form-card">
           <h2>Log in to your account</h2>
-          <p style={{ color: "var(--ink-muted)", fontSize: "0.9rem", margin: "0 0 24px" }}>
-            Admin, Officer, and Vehicle Owner all sign in from here.
-          </p>
+          
 
           <form onSubmit={handleLogin}>
             <div className="field">
@@ -69,12 +67,6 @@ function Login() {
               Log in
             </button>
           </form>
-
-          <div className="divider"><span>or</span></div>
-
-          <button type="button" className="btn btn-outline btn-block">
-            Sign in with Google
-          </button>
 
           <p className="switch">
             New here? <Link to="/register">Create an account</Link>
