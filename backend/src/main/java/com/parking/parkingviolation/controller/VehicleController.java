@@ -25,7 +25,10 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleRepository.findAll());
     }
 
-    // Owner registers/claims a vehicle number
+    // Owner registers/claims a vehicle number.
+    // The Owner is the authoritative source for vehicleType — their declared
+    // type always overrides whatever an Officer may have guessed earlier
+    // when first recording a violation on an unclaimed vehicle.
     @PostMapping("/claim")
     public ResponseEntity<?> claimVehicle(@RequestBody Map<String, String> data) {
         String vehicleNumber = data.get("vehicleNumber").trim().toUpperCase();
@@ -40,9 +43,7 @@ public class VehicleController {
 
         vehicle.setVehicleNumber(vehicleNumber);
         vehicle.setOwner(owner);
-        if (vehicle.getVehicleType() == null || vehicle.getVehicleType().equals("UNKNOWN")) {
-            vehicle.setVehicleType(vehicleType);
-        }
+        vehicle.setVehicleType(vehicleType); // always trust the Owner, no conditional check
 
         Vehicle saved = vehicleRepository.save(vehicle);
         return ResponseEntity.ok(saved);

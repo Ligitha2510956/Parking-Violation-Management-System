@@ -1,6 +1,8 @@
 package com.parking.parkingviolation.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 
 @Entity
@@ -12,9 +14,11 @@ public class ViolationCategory {
     @Column(name = "category_id")
     private Integer categoryId;
 
+    @NotBlank(message = "Category name is required")
     @Column(name = "category_name", nullable = false)
     private String categoryName;
 
+    @DecimalMin(value = "0.0", inclusive = true, message = "Fine amount cannot be negative")
     @Column(name = "fine_amount", nullable = false)
     private BigDecimal fineAmount;
 

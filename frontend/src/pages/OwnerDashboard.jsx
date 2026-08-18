@@ -179,6 +179,12 @@ function OwnerDashboard() {
                       <span className="bill-row-label">Location</span>
                       <span className="bill-row-value">{viol.location}</span>
                     </div>
+                    <div className="bill-row">
+                      <span className="bill-row-label">Date &amp; Time</span>
+                      <span className="bill-row-value">
+                        {new Date(viol.recordedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                      </span>
+                    </div>
 
                     {viol.fineStatus === "PENDING" && (
                       <button

@@ -41,6 +41,7 @@ public class ViolationController {
     @PostMapping
     public ResponseEntity<?> recordViolation(
             @RequestParam("vehicleNumber") String vehicleNumber,
+            @RequestParam("vehicleType") String vehicleType,
             @RequestParam("officerId") Integer officerId,
             @RequestParam("categoryId") Integer categoryId,
             @RequestParam("location") String location,
@@ -60,14 +61,17 @@ public class ViolationController {
             Path filePath = uploadPath.resolve(fileName);
             Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Find vehicle by number, or create a new one (no owner yet) if it doesn't exist
+            // Find vehicle by number, or create a new one (no owner yet) if it doesn't exist.
+            // vehicleType here is the Officer's best-effort guess — it's only a placeholder;
+            // it gets overwritten the moment the real Owner claims this vehicle
+            // (see VehicleController.claimVehicle, which now always trusts the Owner over this guess).
             String normalizedNumber = vehicleNumber.trim().toUpperCase();
             Vehicle vehicle = vehicleRepository.findByVehicleNumber(normalizedNumber)
                     .orElseGet(() -> {
                         Vehicle newVehicle = new Vehicle();
                         newVehicle.setVehicleNumber(normalizedNumber);
                         newVehicle.setOwner(null); // unclaimed until an owner registers this vehicle
-                        newVehicle.setVehicleType("UNKNOWN");
+                        newVehicle.setVehicleType(vehicleType);
                         return vehicleRepository.save(newVehicle);
                     });
 

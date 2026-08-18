@@ -14,7 +14,7 @@ public class Vehicle {
     @Column(name = "vehicle_number", unique = true, nullable = false)
     private String vehicleNumber;
 
-    // Many vehicles -> one owner (constraint #5: owner can have multiple vehicles)
+    // Many vehicles -> one owner 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = true)
     private User owner;

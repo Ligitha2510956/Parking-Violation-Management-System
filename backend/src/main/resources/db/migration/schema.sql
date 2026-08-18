@@ -33,7 +33,7 @@ CREATE TABLE violation_category (
 );
 
 -- 4. Violation table (recorded by Officer)
--- FIX: added `location` column (required by constraint #9, was missing before)
+
 CREATE TABLE violation (
     violation_id INT AUTO_INCREMENT PRIMARY KEY,
     vehicle_id INT NOT NULL,
@@ -50,8 +50,7 @@ CREATE TABLE violation (
 );
 
 -- 5. Appeal table (submitted by Vehicle Owner, resolved by Admin)
--- FIX: status enum now matches constraint #11 exactly (5 states, not 6)
--- Old version had DECISION_PENDING, RESOLVED_APPROVED, RESOLVED_CANCELLED -> replaced with APPROVED, CANCELLED
+
 CREATE TABLE appeal (
     appeal_id INT AUTO_INCREMENT PRIMARY KEY,
     violation_id INT NOT NULL,

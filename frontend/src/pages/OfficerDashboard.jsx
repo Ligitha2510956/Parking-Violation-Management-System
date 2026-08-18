@@ -76,7 +76,7 @@ function OfficerDashboard() {
     <div className="page">
       <div className="barrier-strip" aria-hidden="true"></div>
       <div className="app-header">
-        <div className="app-header-brand">PVMS <span>Officer</span></div>
+        <div className="app-header-brand"><span>Officer</span></div>
         <div className="app-header-right">
           <span className="live-clock">
             {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
@@ -114,7 +114,6 @@ function OfficerDashboard() {
                   <select value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}>
                     <option value="Car">Car</option>
                     <option value="Bike">Bike</option>
-                    <option value="SUV">SUV</option>
                     <option value="Auto">Auto</option>
                     <option value="Truck">Truck</option>
                   </select>
@@ -186,6 +185,12 @@ function OfficerDashboard() {
                 <div className="bill-row">
                   <span className="bill-row-label">Vehicle Type</span>
                   <span className="bill-row-value">{vehicleType}</span>
+                </div>
+                <div className="bill-row">
+                  <span className="bill-row-label">Date &amp; Time</span>
+                  <span className="bill-row-value">
+                    {now.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                  </span>
                 </div>
                 <div className="bill-total-row">
                   <span>Fine Amount</span>

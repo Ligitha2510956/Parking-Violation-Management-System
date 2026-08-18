@@ -182,6 +182,12 @@ function AdminDashboard() {
                         </div>
                         <div className="bill-row"><span className="bill-row-label">Category</span><span className="bill-row-value">{v.category.categoryName}</span></div>
                         <div className="bill-row"><span className="bill-row-label">Officer</span><span className="bill-row-value">{v.officer.name}</span></div>
+                        <div className="bill-row">
+                          <span className="bill-row-label">Date &amp; Time</span>
+                          <span className="bill-row-value">
+                            {new Date(v.recordedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                          </span>
+                        </div>
                       </div>
                     ))}
                 </div>
@@ -284,9 +290,20 @@ function AdminDashboard() {
                   <input type="text" value={catName} onChange={(e) => setCatName(e.target.value)} required />
                 </div>
                 <div className="field">
-                  <label>Fine Amount</label>
-                  <input type="number" value={catFine} onChange={(e) => setCatFine(e.target.value)} required />
-                </div>
+  <label>Fine Amount</label>
+  <input
+    type="number"
+    min="0"
+    value={catFine}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (val === "" || Number(val) >= 0) {
+        setCatFine(val);
+      }
+    }}
+    required
+  />
+</div>
                 <div className="field">
                   <label>Description</label>
                   <input type="text" value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
@@ -367,6 +384,12 @@ function AdminDashboard() {
                   <div className="bill-row"><span className="bill-row-label">Officer</span><span className="bill-row-value">{v.officer.name}</span></div>
                   <div className="bill-row"><span className="bill-row-label">Fine</span><span className="bill-row-value">₹{v.fineAmount}</span></div>
                   <div className="bill-row"><span className="bill-row-label">Location</span><span className="bill-row-value">{v.location}</span></div>
+                  <div className="bill-row">
+                    <span className="bill-row-label">Date &amp; Time</span>
+                    <span className="bill-row-value">
+                      {new Date(v.recordedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
