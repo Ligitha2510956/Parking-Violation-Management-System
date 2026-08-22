@@ -63,4 +63,15 @@ CREATE TABLE appeal (
     FOREIGN KEY (violation_id) REFERENCES violation(violation_id),
     FOREIGN KEY (owner_id) REFERENCES users(user_id)
 );
+
+USE parking_violation_db;
+
+-- Stores warning messages Admin sends to Officers based on their accuracy record
+CREATE TABLE officer_warning (
+    warning_id INT AUTO_INCREMENT PRIMARY KEY,
+    officer_id INT NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (officer_id) REFERENCES users(user_id)
+);
 USE parking_violation_db;

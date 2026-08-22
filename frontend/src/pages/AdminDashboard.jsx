@@ -14,6 +14,8 @@ function AdminDashboard() {
   const [violations, setViolations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [officers, setOfficers] = useState([]);
+  const [appeals, setAppeals] = useState([]);
+  const [accuracy, setAccuracy] = useState([]);
 
   const [catName, setCatName] = useState("");
   const [catFine, setCatFine] = useState("");
@@ -25,10 +27,13 @@ function AdminDashboard() {
   const [offPassword, setOffPassword] = useState("");
   const [offMessage, setOffMessage] = useState("");
 
+  const [warningOpenFor, setWarningOpenFor] = useState(null);
+  const [warningText, setWarningText] = useState("");
+  const [warningMessage, setWarningMessage] = useState("");
+
   const admin = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
-  // Search Violations tab — vehicle number + officer name + category + status
   const [vehicleSearch, setVehicleSearch] = useState("");
   const [officerSearch, setOfficerSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
@@ -45,8 +50,20 @@ function AdminDashboard() {
     setOfficers(o.data);
   };
 
+  const loadAppeals = async () => {
+    const a = await axios.get("http://localhost:8080/api/appeals");
+    setAppeals(a.data);
+  };
+
+  const loadAccuracy = async () => {
+    const acc = await axios.get("http://localhost:8080/api/officers/accuracy");
+    setAccuracy(acc.data);
+  };
+
   useEffect(() => {
     loadData();
+    loadAppeals();
+    loadAccuracy();
   }, []);
 
   const handleAddCategory = async (e) => {
@@ -83,6 +100,29 @@ function AdminDashboard() {
     }
   };
 
+  const handleUpdateAppealStatus = async (appealId, newStatus) => {
+    try {
+      await axios.put(`http://localhost:8080/api/appeals/${appealId}/status`, { status: newStatus });
+      loadAppeals();
+      loadData(); // violation's fine_status may have changed to WAIVED
+      loadAccuracy(); // an APPROVED appeal changes officer accuracy numbers
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSendWarning = async (officerId) => {
+    setWarningMessage("");
+    try {
+      await axios.post(`http://localhost:8080/api/officers/${officerId}/warning`, { message: warningText });
+      setWarningMessage("Warning sent.");
+      setWarningText("");
+      setWarningOpenFor(null);
+    } catch (err) {
+      setWarningMessage("Failed to send warning.");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/");
@@ -109,6 +149,43 @@ function AdminDashboard() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  const pendingAppealsCount = appeals.filter((a) => a.status !== "APPROVED" && a.status !== "CANCELLED").length;
+
+  // Next-step button(s) for a given appeal, based on the 5-stage workflow
+  const renderAppealActions = (appeal) => {
+    switch (appeal.status) {
+      case "SUBMITTED":
+        return (
+          <button className="btn btn-primary btn-sm" onClick={() => handleUpdateAppealStatus(appeal.appealId, "UNDER_REVIEW")}>
+            Start Review
+          </button>
+        );
+      case "UNDER_REVIEW":
+        return (
+          <button className="btn btn-primary btn-sm" onClick={() => handleUpdateAppealStatus(appeal.appealId, "EVIDENCE_REVIEWED")}>
+            Mark Evidence Reviewed
+          </button>
+        );
+      case "EVIDENCE_REVIEWED":
+        return (
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button className="btn btn-success btn-sm" onClick={() => handleUpdateAppealStatus(appeal.appealId, "APPROVED")}>
+              Approve
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={() => handleUpdateAppealStatus(appeal.appealId, "CANCELLED")}>
+              Reject
+            </button>
+          </div>
+        );
+      case "APPROVED":
+        return <span className="pill-paid">Approved — Fine Waived</span>;
+      case "CANCELLED":
+        return <span className="pill-pending" style={{ background: "var(--error-bg)", color: "var(--error)" }}>Rejected</span>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="page">
@@ -145,6 +222,12 @@ function AdminDashboard() {
           <button className={`tab-btn ${activeTab === "violations" ? "active" : ""}`} onClick={() => setActiveTab("violations")}>
             🔍 Search Violations
           </button>
+          <button className={`tab-btn ${activeTab === "appeals" ? "active" : ""}`} onClick={() => setActiveTab("appeals")}>
+            📨 Appeals {pendingAppealsCount > 0 && `(${pendingAppealsCount})`}
+          </button>
+          <button className={`tab-btn ${activeTab === "accuracy" ? "active" : ""}`} onClick={() => setActiveTab("accuracy")}>
+            🎯 Officer Accuracy
+          </button>
         </div>
 
         {/* ---------------- OVERVIEW TAB ---------------- */}
@@ -158,7 +241,6 @@ function AdminDashboard() {
             </div>
 
             <div className="overview-split">
-              {/* Recent Activity */}
               <div>
                 <div className="section-header-icon">
                   <span className="icon-circle">🕒</span>
@@ -193,7 +275,6 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Fine Collection Summary */}
               <div>
                 <div className="section-header-icon">
                   <span className="icon-circle">💰</span>
@@ -290,20 +371,9 @@ function AdminDashboard() {
                   <input type="text" value={catName} onChange={(e) => setCatName(e.target.value)} required />
                 </div>
                 <div className="field">
-  <label>Fine Amount</label>
-  <input
-    type="number"
-    min="0"
-    value={catFine}
-    onChange={(e) => {
-      const val = e.target.value;
-      if (val === "" || Number(val) >= 0) {
-        setCatFine(val);
-      }
-    }}
-    required
-  />
-</div>
+                  <label>Fine Amount</label>
+                  <input type="number" value={catFine} onChange={(e) => setCatFine(e.target.value)} required />
+                </div>
                 <div className="field">
                   <label>Description</label>
                   <input type="text" value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
@@ -405,6 +475,93 @@ function AdminDashboard() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ---------------- APPEALS TAB ---------------- */}
+        {activeTab === "appeals" && (
+          <div className="tab-panel">
+            {appeals.length === 0 && <p className="empty-state">No appeals submitted yet.</p>}
+            <div className="vehicle-list">
+              {appeals.map((a) => (
+                <div key={a.appealId} className="vehicle-card">
+                  <div className="vehicle-card-header">
+                    <span className="plate-chip">{a.violation.vehicle.vehicleNumber}</span>
+                    {renderAppealActions(a)}
+                  </div>
+                  <div className="bill-row"><span className="bill-row-label">Owner</span><span className="bill-row-value">{a.owner.name}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Category</span><span className="bill-row-value">{a.violation.category.categoryName}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Fine Amount</span><span className="bill-row-value">₹{a.violation.fineAmount}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Reason</span><span className="bill-row-value">{a.reason}</span></div>
+                  <div className="bill-row">
+                    <span className="bill-row-label">Submitted</span>
+                    <span className="bill-row-value">
+                      {new Date(a.submittedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    </span>
+                  </div>
+                  {a.counterEvidenceUrl && (
+                    <div className="evidence-frame">
+                      <img src={`http://localhost:8080${a.counterEvidenceUrl}`} alt="Appeal evidence" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- OFFICER ACCURACY TAB ---------------- */}
+        {activeTab === "accuracy" && (
+          <div className="tab-panel">
+            <p style={{ color: "var(--ink-muted)", fontSize: "0.85rem", margin: "0 0 16px" }}>
+              Officers need at least 10 recorded violations to appear here. "Overturn %" = approved appeals ÷ total violations. Officers at or above 20% are flagged.
+            </p>
+
+            {accuracy.length === 0 && <p className="empty-state">No officers meet the minimum 10-violation threshold yet.</p>}
+
+            <div className="vehicle-list">
+              {accuracy.map((o) => (
+                <div key={o.officerId} className="vehicle-card">
+                  <div className="vehicle-card-header">
+                    <span style={{ fontWeight: 700, color: "var(--navy)" }}>{o.name}</span>
+                    {o.flagged && <span className="flag-badge">⚠ Flagged</span>}
+                  </div>
+                  <div className="bill-row"><span className="bill-row-label">Email</span><span className="bill-row-value">{o.email}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Total Violations</span><span className="bill-row-value">{o.totalViolations}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Approved Appeals</span><span className="bill-row-value">{o.approvedAppeals}</span></div>
+                  <div className="bill-row"><span className="bill-row-label">Overturn Rate</span><span className="bill-row-value">{o.mistakePercent}%</span></div>
+
+                  {warningOpenFor === o.officerId ? (
+                    <div style={{ marginTop: "10px" }}>
+                      <div className="field">
+                        <label>Warning Message</label>
+                        <textarea
+                          value={warningText}
+                          onChange={(e) => setWarningText(e.target.value)}
+                          rows={2}
+                          placeholder="Describe the concern..."
+                        />
+                      </div>
+                      {warningMessage && <p className="msg-success">{warningMessage}</p>}
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button className="btn btn-primary btn-sm" onClick={() => handleSendWarning(o.officerId)} disabled={!warningText.trim()}>
+                          Send Warning
+                        </button>
+                        <button className="btn btn-outline btn-sm" onClick={() => setWarningOpenFor(null)}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="btn btn-outline btn-sm"
+                      style={{ marginTop: "10px" }}
+                      onClick={() => { setWarningOpenFor(o.officerId); setWarningText(""); setWarningMessage(""); }}
+                    >
+                      Send Warning
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </main>
